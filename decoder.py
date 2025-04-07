@@ -1,3 +1,11 @@
+# pupyC3D (c) by Antoine MARIN antoine.marin@univ-rennes2.fr
+#
+# pupyC3D is licensed under a
+# Creative Commons Attribution-NonCommercial 4.0 International License.
+#
+# You should have received a copy of the license along with this
+# work. If not, see <https://creativecommons.org/licenses/by-nc/4.0/>.
+
 import struct as _struct
 
 PROCESSOR_INTEL = 84
