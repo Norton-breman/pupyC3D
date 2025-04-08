@@ -11,7 +11,7 @@ import warnings
 import struct
 import math
 import numpy as np
-from decoder import *
+from .decoder import *
 
 #Base class for Parameters and ParameterGroups
 class Metadata:
