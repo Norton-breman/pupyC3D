@@ -213,6 +213,9 @@ class C3DFile:
             self.read_file()
 
     def read_file(self):
+        """
+        Read the C3D file associated with self.filename
+        """
         if os.path.exists(self.filename):
             with open(self.filename, 'rb') as handle:
                 self.__read_header(handle)
@@ -222,6 +225,11 @@ class C3DFile:
             raise FileNotFoundError(self.filename)
 
     def write(self, filename:str='', **kwargs):
+        """
+        Write data to file
+        :param filename: file to write to. If not specified write to self.filename if 'overwrite is True
+        :param 'overwrite': allow overwriting existing file (Bool) default = True
+        """
         overwrite = kwargs.get('overwrite', True)
         if filename == '':
             filename = self.filename
@@ -284,6 +292,57 @@ class C3DFile:
     def get_parameter(self, group_id, param_name):
         g = self.get_parameter_group(group_id)
         return g.parameters.get(param_name, None)
+
+    def get_point_data(self, name: str):
+        """
+        Return trajectory of a point
+        :param name: the point name in string
+        :return: trajectory as np.ndarray (NbFrames X 3)
+        """
+        if name not in self.data['POINTS']:
+            raise ValueError('Point %s does not exists!' %name)
+        return self.data['POINTS'][name]
+
+    def get_point_names(self):
+        """
+        Get a list of all points in the c3d
+        :return: List[str] with all points labels
+        """
+        return list(self.data['POINTS'].keys())
+
+    def get_analog_data(self, name: str):
+        """
+        Return values for an analog chanel
+        :param name: analog name in string
+        :return: analog chanel values as np.ndarray(NbAnalogFrames X 1)
+        """
+        if name not in self.data['ANALOGS']:
+            raise ValueError('Chanel %s does not exists!' %name)
+        return self.data['ANALOGS'][name]
+
+    def get_analog_names(self):
+        """
+        Get a list of all analogs chanels in the c3d
+        :return: List[str] with all analogs labels
+        """
+        return list(self.data['ANALOGS'].keys())
+
+    def get_rotation_data(self, name:str):
+        """
+        Return rotation data (mainly for c3d created by theia markerless software)
+        :param name: Joint name
+        :return: rotation and position data np.ndarray(NbFrames X 4 X 4)
+        """
+        if name not in self.data['ROTATIONS']:
+            raise ValueError('Rotation %s does not exists!' %name)
+        return self.data['ROTATIONS'][name]
+
+    def get_rotation_names(self):
+        """
+        Get a list of all rotation data in the c3d
+        :return: List[str] with all rotations labels
+        """
+        return list(self.data['ROTATIONS'].keys())
 
     def __read_header(self, handle):
         handle.seek(0)
