@@ -303,6 +303,14 @@ class C3DFile:
             raise ValueError('Point %s does not exists!' %name)
         return self.data['POINTS'][name]
 
+    def get_points_data(self, name_list:list[str]):
+        """
+        Get several points trajectories
+        :param name_list: list of the points names
+        :return: dict of name:trajectories data
+        """
+        return {name: self.get_point_data(name) for name in name_list}
+
     def get_point_names(self):
         """
         Get a list of all points in the c3d
@@ -319,6 +327,14 @@ class C3DFile:
         if name not in self.data['ANALOGS']:
             raise ValueError('Chanel %s does not exists!' %name)
         return self.data['ANALOGS'][name]
+
+    def get_analogs_data(self, name_list:list[str]):
+        """
+        Get several analog channels
+        :param name_list: list of the analogs names
+        :return: dict of name:values data
+        """
+        return {name: self.get_analog_data(name) for name in name_list}
 
     def get_analog_names(self):
         """
@@ -337,12 +353,66 @@ class C3DFile:
             raise ValueError('Rotation %s does not exists!' %name)
         return self.data['ROTATIONS'][name]
 
+    def get_rotations_data(self, name_list:list[str]):
+        """
+        Get several rotations data
+        :param name_list: list of the rotations
+        :return: dict of name:values data
+        """
+        return {name: self.get_rotation_data(name) for name in name_list}
+
     def get_rotation_names(self):
         """
         Get a list of all rotation data in the c3d
         :return: List[str] with all rotations labels
         """
         return list(self.data['ROTATIONS'].keys())
+
+    @property
+    def point_count(self):
+        p = self.get_parameter('POINT', 'USED')
+        return p.value
+
+    @property
+    def analog_count(self):
+        p = self.get_parameter('ANALOG', 'USED')
+        if p is not None:
+            return p.value
+        return 0
+
+    @property
+    def frame_count(self):
+        return self.header['last_frame'] - self.header['first_frame'] + 1
+
+    @property
+    def analog_frame_count(self):
+        if self.analog_count > 0:
+            return self.frame_count * self.header['analog_per_frame']
+        return 0
+
+    @property
+    def frame_rate(self):
+        p = self.get_parameter('POINT', 'RATE')
+        return p.value
+
+    @property
+    def analog_rate(self):
+        p = self.get_parameter('ANALOG', 'RATE')
+        if p is not None:
+            return p.value
+        return 0
+
+    @property
+    def point_unit(self):
+        p = self.get_parameter('POINT', 'UNIT')
+        return p.value
+
+    @property
+    def analog_unit(self):
+        p = self.get_parameter('ANALOG', 'UNIT')
+        if p is not None:
+            return p.value
+        return []
 
     def __read_header(self, handle):
         handle.seek(0)
@@ -429,7 +499,8 @@ class C3DFile:
         self.__decoder.write_uint8(processor)
 
         handle.seek(2)
-        self.__decoder.write_uint16(self.header['point_count'])
+        p = self.get_parameter('POINT', 'USED')
+        self.__decoder.write_uint16(p.value)
         if self.header['analog_per_frame'] > 0 and self.header['analog_count'] > 0:
             analog_count = self.header['analog_count']* self.header['analog_per_frame']
         else:
