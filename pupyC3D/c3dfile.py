@@ -184,6 +184,11 @@ class ParameterGroup(Metadata):
             return True
         return False
 
+    def get_parameter(self, name):
+        if name not in self.parameters:
+            return None
+        return self.parameters[name]
+
     def read_from_buffer(self, buffer:ProcStream):
         desc_len = buffer.get_uint8()
         offset = 1
@@ -228,9 +233,9 @@ class C3DFile:
         """
         Write data to file
         :param filename: file to write to. If not specified write to self.filename if 'overwrite is True
-        :param 'overwrite': allow overwriting existing file (Bool) default = True
+        :param 'overwrite': allow overwriting existing file (Bool) default = False
         """
-        overwrite = kwargs.get('overwrite', True)
+        overwrite = kwargs.get('overwrite', False)
         if filename == '':
             filename = self.filename
         if os.path.exists(filename) and not overwrite:
@@ -291,7 +296,9 @@ class C3DFile:
 
     def get_parameter(self, group_id, param_name):
         g = self.get_parameter_group(group_id)
-        return g.parameters.get(param_name, None)
+        if g is not None:
+            return g.parameters.get(param_name, None)
+        return None
 
     def get_point_data(self, name: str):
         """
@@ -449,32 +456,34 @@ class C3DFile:
             self.header['analog_per_frame'] = 1
         self.header['frame_rate'] = self.__decoder.get_float()
 
+        self.header['events'] = dict()
         handle.read(270)
-        label_range_section = self.__decoder.get_uint16()
-        label_first_block = self.__decoder.get_uint16()
-        label_event_fmt = self.__decoder.get_uint16()  # 2 or 4 char
-        if label_event_fmt == 12345:
-            self.header['long_event_labels'] = True
+        self.header['events']['label_range_section'] = self.__decoder.get_uint16()
+        self.header['events']['label_first_block'] = self.__decoder.get_uint16()
+        self.header['events']['label_event_fmt'] = self.__decoder.get_uint16()
+        if self.header['events']['label_event_fmt'] == 12345:
+            self.header['events']['long_event_labels'] = True
         else:
-            self.header['long_event_labels'] = False
-        num_events = self.__decoder.get_uint16()
-
-        if num_events > 0:
-            tmp_event = []
-            self.header['events'] = dict()
+            self.header['events']['long_event_labels'] = False
+        self.header['events']['num_events'] = self.__decoder.get_uint16()
+        if self.header['events']['num_events'] > 0:
+            self.header['events']['data'] = {'labels': [], 'time': [], 'display': []}
             handle.read(2)
-            for i in range(num_events):
-                event_time = self.__decoder.get_float()
-                event_frame = event_time * self.header['frame_rate'] + 1
-                tmp_event.append([event_time, event_frame])
+            for i in range(self.header['events']['num_events']):
+                self.header['events']['data']['time'].append(self.__decoder.get_float())
+            handle.seek(198)
+            print(handle.tell())
+            for i in range(self.header['events']['num_events']):
+                self.header['events']['data']['display'].append(self.__decoder.get_uint8())
+                # print(self.header['events']['data']['display'][i])
             handle.seek(198 * 2)
-            if self.header['long_event_labels']:
+            if self.header['events']['long_event_labels']:
                 num_char = 4
             else:
                 num_char = 2
-            for i in range(num_events):
+            for i in range(self.header['events']['num_events']):
                 name = self.__decoder.get_string(num_char)
-                self.header['events'][name] = tmp_event[i]
+                self.header['events']['data']['labels'].append(name)
 
     def __write_header(self, handle):
         if self.__decoder == 0:
@@ -519,7 +528,27 @@ class C3DFile:
         self.__decoder.write_uint16(analog_per_frame)
         self.__decoder.write_float(self.header['frame_rate'])
 
-        # TODO : Add event list
+        handle.seek(handle.tell() + 270)
+        self.__decoder.write_uint16(self.header['events']['label_range_section'])
+        self.__decoder.write_uint16(self.header['events']['label_first_block'])
+        self.__decoder.write_uint16(self.header['events']['label_event_fmt'])
+        self.__decoder.write_uint16(self.header['events']['num_events'])
+        if self.header['events']['num_events'] > 0:
+            handle.seek(handle.tell() + 2)
+            for i in range(self.header['events']['num_events']):
+                self.__decoder.write_float(self.header['events']['data']['time'][i])
+            handle.seek(198)
+            print(handle.tell())
+            for i in range(self.header['events']['num_events']):
+                self.__decoder.write_uint8(self.header['events']['data']['display'][i])
+            handle.seek(198 * 2)
+            if self.header['events']['long_event_labels']:
+                num_char = 4
+            else:
+                num_char = 2
+            for i in range(self.header['events']['num_events']):
+                name = self.header['events']['data']['labels'][i].ljust(num_char)
+                self.__decoder.write_string(name)
 
     def __read_parameters(self, handle):
         handle.seek((self.header['parameter_block'] - 1) * 512)
