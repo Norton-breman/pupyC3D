@@ -411,12 +411,12 @@ class C3DFile:
 
     @property
     def point_unit(self):
-        p = self.get_parameter('POINT', 'UNIT')
+        p = self.get_parameter('POINT', 'UNITS')
         return p.value
 
     @property
     def analog_unit(self):
-        p = self.get_parameter('ANALOG', 'UNIT')
+        p = self.get_parameter('ANALOG', 'UNITS')
         if p is not None:
             return p.value
         return []
