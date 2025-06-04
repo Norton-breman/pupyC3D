@@ -11,6 +11,6 @@ Pure Python C3D reader and writer
 
 4- run this command to generate a wheel file : python setup.py bdist_wheel
 
-5- install the wheel file with : pip install pupyc3d-0.1.0-py3-none-any.whl 
+5- install the wheel file located in the dist directory with : pip install pupyc3d-0.1.0-py3-none-any.whl 
 
 
