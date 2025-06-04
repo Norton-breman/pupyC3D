@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06c5427d-4b84-40ec-9955-c39dafc3a3c1" name="Changes" comment="remove old __init__.py">
+    <list default="true" id="06c5427d-4b84-40ec-9955-c39dafc3a3c1" name="Changes" comment="fix bug in units getters">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pupyC3D/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/pupyC3D/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pupyC3D/c3dfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/pupyC3D/c3dfile.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -47,6 +46,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Python.c3dfile.executor&quot;: &quot;Debug&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
@@ -121,7 +121,47 @@
       <option name="project" value="LOCAL" />
       <updated>1744099675342</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="fix some bugs">
+      <option name="closed" value="true" />
+      <created>1744105089158</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1744105089158</updated>
+    </task>
+    <task id="LOCAL-00008" summary="add getter functions and some docstrings">
+      <option name="closed" value="true" />
+      <created>1744107587383</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1744107587383</updated>
+    </task>
+    <task id="LOCAL-00009" summary="add several getters">
+      <option name="closed" value="true" />
+      <created>1744114542329</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1744114542329</updated>
+    </task>
+    <task id="LOCAL-00010" summary="add read and write header events">
+      <option name="closed" value="true" />
+      <created>1744289550917</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1744289550917</updated>
+    </task>
+    <task id="LOCAL-00011" summary="fix bug in units getters">
+      <option name="closed" value="true" />
+      <created>1744373944759</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1744373944759</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -130,6 +170,22 @@
     <MESSAGE value="change directory structure" />
     <MESSAGE value="add setup.py and requirement.txt, __init__.py in package directory" />
     <MESSAGE value="remove old __init__.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove old __init__.py" />
+    <MESSAGE value="fix some bugs" />
+    <MESSAGE value="add getter functions and some docstrings" />
+    <MESSAGE value="add several getters" />
+    <MESSAGE value="add read and write header events" />
+    <MESSAGE value="fix bug in units getters" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix bug in units getters" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/pupyC3D/c3dfile.py</url>
+          <line>81</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

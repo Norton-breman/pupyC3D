@@ -602,9 +602,9 @@ class C3DFile:
         handle.seek((512 * (self.header['data_block'] - 1)))
         nb_frames = self.header['last_frame'] - self.header['first_frame'] + 1
         point_used = self.header['point_count']
+        scale = abs(self.header['scale_factor'])
+        is_float = self.header['scale_factor'] < 0
         if point_used > 0:
-            scale = abs(self.header['scale_factor'])
-            is_float = self.header['scale_factor'] < 0
             point_scale = [scale, 1][is_float]
             names_param = self.get_parameter('POINT', 'LABELS')
             marker_names = names_param.value.tolist()
