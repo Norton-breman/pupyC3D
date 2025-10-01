@@ -13,37 +13,95 @@ import math
 import numpy as np
 from .decoder import *
 
-#Base class for Parameters and ParameterGroups
 class Metadata:
+    """Base class for Parameters and ParameterGroups.
+    
+    Handles common functionality for C3D metadata elements including
+    name, description, and group ID management.
+    """
 
     def __init__(self, name:str, group_id:int):
+        """Initialize metadata object.
+        
+        Args:
+            name (str): Name of the metadata element
+            group_id (int): ID of the parameter group
+        """
         self.name = name
         self.description = ''
         self.group_id = group_id
 
     def read_from_buffer(self, buffer:ProcStream):
+        """Read metadata from binary buffer.
+        
+        Args:
+            buffer (ProcStream): Binary data stream
+            
+        Returns:
+            int: Number of bytes read
+        """
         return 0
 
     def write_to_buffer(self, buffer: ProcStream):
+        """Write metadata to binary buffer.
+        
+        Args:
+            buffer (ProcStream): Binary data stream to write to
+        """
         buffer.write_int8(len(self.name))
         buffer.write_int8(self.group_id)
         buffer.write_string(self.name)
 
     def _get_offset(self):
+        """Calculate byte offset for metadata structure.
+        
+        Returns:
+            int: Offset in bytes
+        """
         return 2 + len(self.description) + 1
 
     def get_size(self):
+        """Calculate total size of metadata structure.
+        
+        Returns:
+            int: Total size in bytes
+        """
         return 2 + len(self.name) + self._get_offset()
 
 
 class Parameter(Metadata):
+    """Represents a C3D parameter with typed data.
+    
+    Parameters can store scalar values or multi-dimensional arrays
+    of various types (int8, uint16, float, string).
+    """
 
     def __init__(self, name:str, group_id:int):
+        """Initialize parameter.
+        
+        Args:
+            name (str): Parameter name
+            group_id (int): ID of the parameter group
+        """
         super(Parameter, self).__init__(name, group_id)
         self.data_type = 0
         self.value = None
 
     def read_from_buffer(self, buffer:ProcStream):
+        """Read parameter data from binary buffer.
+        
+        Supports scalar and multi-dimensional array data of types:
+        - int8 (data_type=1)
+        - uint16 (data_type=2) 
+        - float (data_type=4)
+        - string (data_type=-1)
+        
+        Args:
+            buffer (ProcStream): Binary data stream
+            
+        Returns:
+            int: Number of bytes read
+        """
         offset = 0
         self.data_type = buffer.get_int8()
         offset += 1
@@ -165,12 +223,31 @@ class Parameter(Metadata):
 
 
 class ParameterGroup(Metadata):
+    """Represents a group of related C3D parameters.
+    
+    Parameter groups organize parameters by functionality
+    (e.g., POINT, ANALOG, TRIAL groups).
+    """
 
     def __init__(self, name:str, group_id:int):
+        """Initialize parameter group.
+        
+        Args:
+            name (str): Group name
+            group_id (int): Unique group identifier
+        """
         super(ParameterGroup, self).__init__(name, group_id)
         self.parameters = dict()
 
     def add_parameter(self, name)->Parameter:
+        """Add a new parameter to this group.
+        
+        Args:
+            name (str): Parameter name
+            
+        Returns:
+            Parameter: New or existing parameter
+        """
         if name not in self.parameters:
             param = Parameter(name, -self.group_id)
             self.parameters[param.name] = param
@@ -179,12 +256,28 @@ class ParameterGroup(Metadata):
         return self.parameters[name]
 
     def remove_parameter(self, name):
+        """Remove a parameter from this group.
+        
+        Args:
+            name (str): Parameter name to remove
+            
+        Returns:
+            bool: True if parameter was removed, False if not found
+        """
         if name in self.parameters:
             self.parameters.pop(name)
             return True
         return False
 
     def get_parameter(self, name):
+        """Get a parameter by name.
+        
+        Args:
+            name (str): Parameter name
+            
+        Returns:
+            Parameter or None: Parameter object if found
+        """
         if name not in self.parameters:
             return None
         return self.parameters[name]
@@ -207,8 +300,25 @@ class ParameterGroup(Metadata):
 
 
 class C3DFile:
+    """Main class for reading and writing C3D files.
+    
+    C3D files contain 3D coordinate data, parameters, and metadata
+    commonly used in biomechanics and motion capture applications.
+    
+    Attributes:
+        filename (str): Path to the C3D file
+        header (dict): File header information
+        groups (dict): Parameter groups indexed by group ID
+        data (dict): Point and analog data
+    """
 
     def __init__(self, filename:str=''):
+        """Initialize C3DFile object.
+        
+        Args:
+            filename (str, optional): Path to C3D file. If file exists,
+                it will be automatically loaded.
+        """
         self.filename = filename
         self.__decoder = None
         self.header = dict()
@@ -230,10 +340,15 @@ class C3DFile:
             raise FileNotFoundError(self.filename)
 
     def write(self, filename:str='', **kwargs):
-        """
-        Write data to file
-        :param filename: file to write to. If not specified write to self.filename if 'overwrite is True
-        :param 'overwrite': allow overwriting existing file (Bool) default = False
+        """Write C3D data to file.
+        
+        Args:
+            filename (str, optional): Output file path. Defaults to self.filename.
+            **kwargs: Additional options:
+                overwrite (bool): Allow overwriting existing file. Defaults to False.
+                
+        Raises:
+            Warning: If file exists and overwrite=False
         """
         overwrite = kwargs.get('overwrite', False)
         if filename == '':
@@ -247,6 +362,15 @@ class C3DFile:
             self.__write_data(handle)
 
     def add_parameter_group(self, name, gid=0)->ParameterGroup:
+        """Add a new parameter group.
+        
+        Args:
+            name (str): Group name
+            gid (int, optional): Group ID. If 0, auto-assigned. Defaults to 0.
+            
+        Returns:
+            ParameterGroup or None: New group if created, None if already exists
+        """
         assert(gid <= 0)
         if gid == 0:
             g = self.get_parameter_group(name)
@@ -266,6 +390,14 @@ class C3DFile:
         return self.groups[gid]
 
     def remove_parameter_group(self, group)->bool:
+        """Remove a parameter group.
+        
+        Args:
+            group (int or str): Group ID or name
+            
+        Returns:
+            bool: True if group was removed, False if not found
+        """
         g = self.get_parameter_group(group)
         if g is not None:
             self.groups.pop(g.group_id)
@@ -273,6 +405,17 @@ class C3DFile:
         return False
 
     def get_parameter_group(self, group_id)->ParameterGroup:
+        """Get a parameter group by ID or name.
+        
+        Args:
+            group_id (int or str): Group ID or name
+            
+        Returns:
+            ParameterGroup or None: Parameter group if found
+            
+        Raises:
+            TypeError: If group_id is neither int nor str
+        """
         if isinstance(group_id, int):
             return self.groups.get(group_id, None)
         elif isinstance(group_id, str):
