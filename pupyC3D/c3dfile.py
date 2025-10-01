@@ -520,11 +520,19 @@ class C3DFile:
 
     @property
     def point_count(self):
+        """
+        Get the number of 3D points in the c3d
+        :return: int
+        """
         p = self.get_parameter('POINT', 'USED')
         return p.value
 
     @property
     def analog_count(self):
+        """
+        Get the number of analog channels in the c3d
+        :return: int
+        """
         p = self.get_parameter('ANALOG', 'USED')
         if p is not None:
             return p.value
@@ -532,21 +540,37 @@ class C3DFile:
 
     @property
     def frame_count(self):
+        """
+        Get the number of 3D points frames
+        :return: int
+        """
         return self.header['last_frame'] - self.header['first_frame'] + 1
 
     @property
     def analog_frame_count(self):
+        """
+        Get the number of analog frames
+        :return: int
+        """
         if self.analog_count > 0:
             return self.frame_count * self.header['analog_per_frame']
         return 0
 
     @property
     def frame_rate(self):
+        """
+        Get the 3D points frame rate
+        :return: float
+        """
         p = self.get_parameter('POINT', 'RATE')
         return p.value
 
     @property
     def analog_rate(self):
+        """
+        Get the analog channels frame rate
+        :return: float
+        """
         p = self.get_parameter('ANALOG', 'RATE')
         if p is not None:
             return p.value
@@ -554,11 +578,19 @@ class C3DFile:
 
     @property
     def point_unit(self):
+        """
+        Get the 3D points unit (usually mm or m)
+        :return: str
+        """
         p = self.get_parameter('POINT', 'UNITS')
         return p.value
 
     @property
     def analog_unit(self):
+        """
+        Get the analog channels unit (mV, V, ...)
+        :return: str
+        """
         p = self.get_parameter('ANALOG', 'UNITS')
         if p is not None:
             return p.value
