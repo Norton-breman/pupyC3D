@@ -2,7 +2,7 @@
 #
 # pupyC3D is licensed under a
 # Creative Commons Attribution-NonCommercial 4.0 International License.
-
+#
 # You should have received a copy of the license along with this
 # work. If not, see <https://creativecommons.org/licenses/by-nc/4.0/>.
 
@@ -137,11 +137,11 @@ class Parameter(Metadata):
                 else:
                     data = np.array([buffer.get_string(prod).strip()])
             elif self.data_type == 1:
-                data = np.array([buffer.get_int8() for _ in range(prod)]).reshape(dims)
+                data = np.array([buffer.get_int8() for _ in range(prod)]).reshape(dims[::-1])
             elif self.data_type == 2:
-                data = np.array([buffer.get_uint16() for _ in range(prod)]).reshape(dims)
+                data = np.array([buffer.get_uint16() for _ in range(prod)]).reshape(dims[::-1])
             elif self.data_type == 4:
-                data = np.array([buffer.get_float() for _ in range(prod)]).reshape(dims)
+                data = np.array([buffer.get_float() for _ in range(prod)]).reshape(dims[::-1])
             else:
                 data = np.array([])
 
