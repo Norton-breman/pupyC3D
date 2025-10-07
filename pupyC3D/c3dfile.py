@@ -2,7 +2,7 @@
 #
 # pupyC3D is licensed under a
 # Creative Commons Attribution-NonCommercial 4.0 International License.
-
+#
 # You should have received a copy of the license along with this
 # work. If not, see <https://creativecommons.org/licenses/by-nc/4.0/>.
 
@@ -822,10 +822,14 @@ class C3DFile:
         for i in range(nb_frames):
             if point_used > 0:
                 self.__read_point_frame(i, is_float, point_scale, marker_names)
-            if rot_param is not None:
-                self.__read_rotation_frame(i, rotation_names)
             if analog_used >0:
                 self.__read_analog_frame(i, is_float, self.header['analog_per_frame'], offsets, scales, gen_scale, analog_names)
+
+        if rot_param is not None:
+            data_start = self.get_parameter('ROTATION', 'DATA_START').value
+            handle.seek((512 * (data_start - 1)))
+            for i in range(nb_frames):
+                self.__read_rotation_frame(i, rotation_names)
 
     def __read_point_frame(self, frame_num, is_float, point_scale, marker_names):
         for j, m in enumerate(marker_names):
@@ -860,6 +864,7 @@ class C3DFile:
                           [self.__decoder.get_float(), self.__decoder.get_float(), self.__decoder.get_float(),
                            self.__decoder.get_float()]])
             self.data['ROTATIONS'][name][frame_num, :, :] = p.transpose()
+            self.__decoder.get_float()
 
     def __write_data(self, handle):
         handle.seek((512 * (self.header['data_block'] - 1)))
